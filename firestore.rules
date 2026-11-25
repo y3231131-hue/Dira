@@ -1,8 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    match /flats/{code}/{document=**} {
-      allow read, write: if request.auth != null && code.size() >= 8;
+  match /databases/{db}/documents {
+    match /flats/{code} {
+      function ok() { return request.auth != null && code.size() >= 8; }
+      function isAdmin() { return ok() && existsAfter(/databases/$(db)/documents/flats/$(code)/admins/$(request.auth.uid)); }
+      function mine() { return ok() && resource.data.uid == request.auth.uid; }
+      function mineNew() { return ok() && request.resource.data.uid == request.auth.uid; }
+
+      match /{col}/{id} {
+        allow read: if ok();
+        allow write: if ok() && !(col in ['flat','claims','admins','meta','chat','polls','status','typing','votes','voted']);
+      }
+      match /flat/{id} { allow write: if isAdmin(); }
+      match /claims/{id} {
+        allow create: if mineNew();
+        allow update, delete: if isAdmin();
+      }
+      match /meta/{id} { allow create: if ok(); }
+      match /admins/{id} {
+        allow create: if ok() && request.auth.uid == id && !exists(/databases/$(db)/documents/flats/$(code)/meta/admin);
+        allow create, delete: if isAdmin();
+      }
+      match /chat/{id} {
+        allow create: if mineNew();
+        allow update: if (mine() && request.resource.data.uid == request.auth.uid) || isAdmin();
+        allow delete: if mine() || isAdmin();
+      }
+      match /polls/{id} {
+        allow create: if mineNew();
+        allow update: if (mine() && request.resource.data.uid == request.auth.uid) || isAdmin();
+        allow delete: if mine() || isAdmin();
+      }
+      match /status/{id} {
+        allow create: if mineNew();
+        allow delete: if mine() || isAdmin() || (ok() && request.time.toMillis() - resource.data.ts > 86400000);
+      }
+      match /typing/{id} { allow write: if ok() && request.auth.uid == id; }
+      match /votes/{id} { allow write: if ok() && id.split('_')[1] == request.auth.uid; }
+      match /voted/{id} { allow write: if ok() && id.split('_')[1] == request.auth.uid; }
     }
   }
 }

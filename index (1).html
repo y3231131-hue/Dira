@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flat Manager</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#1f7a5c">
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--tx:#1d1d1b;--mu:#6b6a66;--ac:#1f7a5c;--acx:#fff;--bd:#e4e2db;--neg:#c0392b;--pos:#1f7a5c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#222221;--tx:#f0efea;--mu:#9b9a94;--ac:#4cc29b;--acx:#0b2a20;--bd:#333331;--neg:#ff7a6b;--pos:#4cc29b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#161615;--card:#222221;--tx:#f0efea;--mu:#9b9a94;--ac:#4cc29b;--acx:#0b2a20;--bd:#333331;--neg:#ff7a6b;--pos:#4cc29b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;padding:12px 12px 40px 78px}
+h1{font-size:20px;margin:4px 0 10px}
+nav{position:fixed;left:6px;top:calc(env(safe-area-inset-top,0px) + 8px);width:62px;display:flex;flex-direction:column;gap:6px;z-index:5;max-height:calc(100% - 16px);overflow-y:auto}
+nav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:12px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font:inherit;font-size:10px}
+nav button span{font-size:20px;line-height:1}
+nav button.on{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+#cl{max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.bub{align-self:flex-start;max-width:85%;background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:7px 10px;word-break:break-word}
+.bub.mine{align-self:flex-end;background:var(--ac);color:var(--acx)}
+.bub.mine .mu{color:inherit;opacity:.8}
+.crow{display:flex;gap:6px}.crow input{margin:0}.crow .btn{width:auto;margin:0;padding:0 16px}
+#gate{display:none}body.gated nav,body.gated section{display:none!important}
+textarea{width:100%;padding:10px;margin:4px 0;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit;min-height:80px}
+.opt{display:flex;justify-content:space-between;width:100%;margin:4px 0;padding:10px;border-radius:10px;border:1px solid var(--bd);color:var(--tx);font:inherit;text-align:left;background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 28%,transparent) var(--p,0%),transparent var(--p,0%))}
+.opt.me{border-color:var(--ac);border-width:2px}.opt.win{border-color:var(--pos);border-width:2px}
+.sm{width:auto;padding:8px 12px;font-size:14px;margin:6px 6px 0 0}.sm.g{background:var(--bg);color:var(--neg);border:1px solid var(--bd)}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+h2{font-size:15px;margin:0 0 8px}
+input,select{width:100%;padding:10px;margin:4px 0;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+.btn{width:100%;padding:11px;border:0;border-radius:10px;background:var(--ac);color:var(--acx);font:inherit;font-weight:600;margin-top:6px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.row:last-child{border-bottom:0}
+.mu{color:var(--mu);font-size:13px}
+.pos{color:var(--pos);font-weight:600}.neg{color:var(--neg);font-weight:600}
+.x{background:none;border:0;color:var(--mu);font-size:18px;padding:4px 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chips label{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid var(--bd);border-radius:20px;font-size:14px}
+.chips input{width:auto;margin:0}
+#msg{padding:10px;color:var(--mu);font-size:14px}
+</style>
+</head>
+<body>
+<h1>🏠 Flat Manager</h1>
+<div id="msg">Loading…</div>
+<div id="gate" class="card"></div>
+<nav id="nav">
+<button data-t="bal" class="on"><span>💰</span>Balance</button>
+<button data-t="exp"><span>🧾</span>Expenses</button>
+<button data-t="rent"><span>🏠</span>Rent</button>
+<button data-t="clean"><span>🧹</span>Cleaning</button>
+<button data-t="shop"><span>🛒</span>Shopping</button>
+<button data-t="polls"><span>🗳️</span>Polls</button>
+<button data-t="status"><span>🕒</span>Status</button>
+<button data-t="chat"><span>💬</span>Chat</button>
+<button data-t="ppl"><span>👥</span>People</button>
+</nav>
+
+<section id="bal" class="on">
+<div class="card"><h2>Who owes who</h2><div id="sug"></div></div>
+<div class="card"><h2>Balance per person</h2><div id="bals"></div></div>
+<div class="card"><h2>Record a payment</h2>
+<div class="mu">When someone pays back someone else.</div>
+<select id="pf"></select><select id="pt"></select>
+<input id="pa" type="number" inputmode="decimal" placeholder="Amount">
+<button class="btn" id="padd">Save payment</button>
+<div id="pl" style="margin-top:8px"></div></div>
+</section>
+
+<section id="exp">
+<div class="card"><h2>New expense</h2>
+<input id="ed" placeholder="What? (rent, internet, cleaning…)">
+<input id="ea" type="number" inputmode="decimal" placeholder="Amount">
+<div class="mu">Paid by</div><select id="ep"></select>
+<div class="mu">Split between</div><div class="chips" id="es"></div>
+<button class="btn" id="eadd">Add expense</button></div>
+<div class="card"><h2>History</h2><div id="el"></div></div>
+</section>
+
+<section id="rent">
+<div class="card"><h2>Monthly rent</h2>
+<div class="row"><button class="x" id="rprev">◀</button><b id="rmon"></b><button class="x" id="rnext">▶</button></div>
+<div id="rlist"></div><div id="rsum" class="mu"></div></div>
+<div class="card"><h2>Set rent per person</h2>
+<input id="rtot" type="number" inputmode="decimal" placeholder="Total rent per month">
+<button class="btn" id="req">Split equally</button>
+<div id="ramts" style="margin-top:8px"></div>
+<button class="btn" id="rsave">Save amounts</button></div>
+</section>
+
+<section id="clean">
+<div class="card"><h2>This week</h2><div class="mu" id="cwk"></div><div id="cthis"></div></div>
+<div class="card"><h2>Next week</h2><div id="cnext"></div></div>
+<div class="card"><h2>Cleaning tasks</h2><div id="ctasks"></div>
+<input id="cti" placeholder="New task (kitchen, bathroom…)">
+<button class="btn" id="ctadd">Add task</button>
+<div class="mu" style="margin-top:6px">Tasks rotate every week, so everyone cleans something different each time.</div></div>
+</section>
+
+<section id="shop">
+<div class="card"><h2>Shared shopping list</h2>
+<input id="si" placeholder="Add item (toilet paper, soap…)">
+<button class="btn" id="sadd">Add</button>
+<div id="sl" style="margin-top:8px"></div></div>
+</section>
+
+<section id="polls">
+<div class="card"><h2>New poll or bet</h2>
+<input id="qq" placeholder="Question (e.g. Who cleans on Sunday?)">
+<textarea id="qo" placeholder="Options, one per line"></textarea>
+<select id="qt"><option value="poll">Poll</option><option value="bet">Bet (public, pick a winner later)</option></select>
+<label id="qal" class="mu" style="display:flex;gap:8px;align-items:center;margin:6px 0"><input id="qa" type="checkbox" style="width:auto;margin:0">🔒 Secret votes (nobody sees who voted what)</label>
+<input id="qs" placeholder="Stake (e.g. loser buys pizza)" style="display:none">
+<button class="btn" id="qgo">Create</button></div>
+<div id="pollist"></div>
+</section>
+
+<section id="status">
+<div class="card"><h2>Status (disappears after 24h)</h2>
+<input id="sti" placeholder="What's up?">
+<div class="crow"><button class="btn" id="sph">📷 Photo</button><button class="btn" id="spost">Post</button></div></div>
+<div id="stl"></div>
+</section>
+
+<section id="chat">
+<div class="card"><h2>Flat chat</h2>
+<div id="cl"></div>
+<div class="mu">Writing as</div><select id="cm"></select>
+<div class="mu" id="ctyp" style="min-height:18px"></div>
+<div class="crow"><button class="btn" id="cat">📎</button><button class="btn" id="cmic">🎤</button><input id="ci" placeholder="Message…"><button class="btn" id="csend">Send</button></div></div>
+<input type="file" id="ifile" hidden>
+</section>
+
+<section id="ppl">
+<div class="card"><h2>Flatmates</h2>
+<div id="pp"></div>
+<input id="pn" placeholder="Name">
+<button class="btn" id="pnadd">Add person</button></div>
+<div class="card"><h2>I am…</h2><select id="me"></select>
+<div class="mu">Only used to pre-select you as the payer on this phone.</div></div>
+<div class="card"><button class="btn" id="nbtn">🔔 Enable notifications</button><button class="btn" id="lout" style="background:var(--bg);color:var(--neg);border:1px solid var(--bd)">Log out</button><div class="mu" style="margin-top:6px">Notifications arrive while the app is open or in the background.</div></div>
+<div class="card mu">Everyone in the flat uses the same flat code (asked on first launch). Keep it private.</div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let UID=null,MY=null,ADMIN=false,subs=false,loaded={};
+const S={members:[],exp:[],pay:[],shop:[],chat:[],polls:[],votes:[],anon:[],voted:[],rent:{},rentpaid:[],tasks:[],cdone:[],claims:[],admins:[],status:[],typing:[]};
+let db=null;
+const fmt=n=>(Math.round(n*100)/100).toFixed(2);
+function el(tag,txt,cls){const e=document.createElement(tag);if(txt!=null)e.textContent=txt;if(cls)e.className=cls;return e}
+function getMe(){return MY?MY.name:""}
+function setMe(v){try{localStorage.setItem("me",v)}catch(e){}}
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button,section").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");$(b.dataset.t).classList.add("on");
+});
+
+function balances(){
+  const b={};S.members.forEach(m=>b[m]=0);
+  S.exp.forEach(e=>{
+    const sp=(e.split||[]).filter(x=>x in b);if(!sp.length||!(e.by in b))return;
+    b[e.by]+=e.amount;sp.forEach(s=>b[s]-=e.amount/sp.length);
+  });
+  S.pay.forEach(p=>{if(p.from in b&&p.to in b){b[p.from]+=p.amount;b[p.to]-=p.amount}});
+  return b;
+}
+function suggestions(b){
+  const d=[],c=[];
+  Object.entries(b).forEach(([n,v])=>{if(v<-0.005)d.push([n,-v]);else if(v>0.005)c.push([n,v])});
+  d.sort((a,b)=>b[1]-a[1]);c.sort((a,b)=>b[1]-a[1]);
+  const out=[];let i=0,j=0;
+  while(i<d.length&&j<c.length){
+    const a=Math.min(d[i][1],c[j][1]);
+    out.push([d[i][0],c[j][0],a]);
+    d[i][1]-=a;c[j][1]-=a;
+    if(d[i][1]<0.005)i++;if(c[j][1]<0.005)j++;
+  }
+  return out;
+}
+function fillSelect(sel,keep){
+  const cur=keep?sel.value:"";sel.textContent="";
+  S.members.forEach(m=>{const o=el("option",m);o.value=m;sel.appendChild(o)});
+  if(cur&&S.members.includes(cur))sel.value=cur;
+}
+let lastMembers="";let lastChat=0;
+function render(){
+  refreshMe();gate();applyRole();checkNotify();
+  const b=balances(),sug=suggestions(b);
+  const key=S.members.join("|");
+  if(key!==lastMembers){
+    lastMembers=key;
+    ["ep","pf","pt","me"].forEach(id=>fillSelect($(id),true));
+    const me=getMe();if(S.members.includes(me)){$("me").value=me;$("ep").value=me;$("pf").value=me;$("cm").value=me}
+    if(S.members.length>1)$("pt").value=S.members.find(m=>m!==$("pf").value);
+    const es=$("es");es.textContent="";
+    S.members.forEach(m=>{const l=el("label");const c=document.createElement("input");c.type="checkbox";c.checked=true;c.value=m;l.appendChild(c);l.appendChild(document.createTextNode(m));es.appendChild(l)});
+  }
+  const s=$("sug");s.textContent="";
+  if(!S.members.length)s.appendChild(el("div","Start by adding your flatmates in the People tab.","mu"));
+  else if(!sug.length)s.appendChild(el("div","Everyone is even ✅","mu"));
+  sug.forEach(([f,t,a])=>{const r=el("div",null,"row");r.appendChild(el("span",f+" → "+t));r.appendChild(el("span",fmt(a),"neg"));s.appendChild(r)});
+  const bs=$("bals");bs.textContent="";
+  S.members.forEach(m=>{const r=el("div",null,"row");r.appendChild(el("span",m));const v=b[m];r.appendChild(el("span",(v>0?"+":"")+fmt(v),v>0.005?"pos":v<-0.005?"neg":"mu"));bs.appendChild(r)});
+  const el_=$("el");el_.textContent="";
+  if(!S.exp.length)el_.appendChild(el("div","No expenses yet.","mu"));
+  S.exp.forEach(e=>{
+    const r=el("div",null,"row");const l=el("div");
+    l.appendChild(el("div",e.desc));
+    l.appendChild(el("div",e.by+" paid · split "+(e.split||[]).length+" · "+new Date(e.ts).toLocaleDateString(),"mu"));
+    r.appendChild(l);const rt=el("div");rt.style.whiteSpace="nowrap";
+    rt.appendChild(el("span",fmt(e.amount)));
+    const x=el("button","✕","x");x.onclick=()=>{if(confirm("Delete this expense?"))db.collection("expenses").doc(e.id).delete()};
+    rt.appendChild(x);r.appendChild(rt);el_.appendChild(r);
+  });
+  const pl=$("pl");pl.textContent="";
+  S.pay.forEach(p=>{
+    const r=el("div",null,"row");r.appendChild(el("span",p.from+" paid "+p.to+" · "+fmt(p.amount),"mu"));
+    const x=el("button","✕","x");x.onclick=()=>{if(confirm("Delete this payment?"))db.collection("payments").doc(p.id).delete()};
+    r.appendChild(x);pl.appendChild(r);
+  });
+  const sl=$("sl");sl.textContent="";
+  S.shop.forEach(i=>{
+    const r=el("div",null,"row");const l=el("label");l.style.cssText="display:flex;gap:8px;align-items:center;flex:1";
+    const c=document.createElement("input");c.type="checkbox";c.checked=!!i.done;c.style.width="auto";
+    c.onchange=()=>db.collection("shopping").doc(i.id).update({done:c.checked});
+    const t=el("span",i.name);if(i.done)t.style.textDecoration="line-through",t.style.color="var(--mu)";
+    l.appendChild(c);l.appendChild(t);r.appendChild(l);
+    const x=el("button","✕","x");x.onclick=()=>db.collection("shopping").doc(i.id).delete();
+    r.appendChild(x);sl.appendChild(r);
+  });
+  renderPolls();renderRent();renderClean();renderStatus();
+  renderChat();
+  const pp=$("pp");pp.textContent="";
+  S.members.forEach(m=>{
+    const r=el("div",null,"row");r.appendChild(el("span",m));
+    const used=S.exp.some(e=>e.by===m||(e.split||[]).includes(m))||S.pay.some(p=>p.from===m||p.to===m);
+    const cq=S.claims.find(c=>c.name===m),isAd=cq&&S.admins.some(a=>a.id===cq.uid);
+    r.firstChild.textContent=m+(cq?(isAd?" 👑 admin":" ✓"):" (not joined)");
+    if(ADMIN){
+      if(cq){const rl=el("button","↺","x");rl.onclick=()=>{if(confirm("Release "+m+" so the name can be claimed again?"))db.collection("claims").doc(cq.id).delete()};r.appendChild(rl);
+        if(!isAd){const ad=el("button","👑","x");ad.onclick=()=>{if(confirm("Make "+m+" an admin?"))db.collection("admins").doc(cq.uid).set({ts:Date.now()})};r.appendChild(ad)}}
+      else if(!used){const x=el("button","✕","x");x.onclick=()=>saveMembers(S.members.filter(n=>n!==m));r.appendChild(x)}
+    }
+    pp.appendChild(r);
+  });
+}
+const nk=s=>s.replace(/[^A-Za-z0-9]/g,c=>"~"+c.charCodeAt(0).toString(16));
+async function vote(p,i){
+  const who=$("cm").value;
+  if(!who){alert("Choose who you are first (Chat or People tab).");return}
+  if(p.closed)return;
+  try{
+    if(p.anon){
+      if(S.voted.some(v=>v.id===p.id+"_"+UID))return;
+      await db.doc("voted/"+p.id+"_"+UID).set({poll:p.id,ts:Date.now()});
+      await db.collection("anonvotes").add({poll:p.id,opt:i});
+    }else{
+      await db.doc("votes/"+p.id+"_"+UID).set({poll:p.id,name:who,opt:i,ts:Date.now()});
+    }
+  }catch(e){alert("Could not vote: "+e.message)}
+}
+function renderPolls(){
+  const box=$("pollist");box.textContent="";const who=$("cm").value;
+  if(!S.polls.length)box.appendChild(el("div","No polls or bets yet.","mu"));
+  S.polls.forEach(p=>{
+    const card=el("div",null,"card");
+    const tag=p.bet?"🎲 Bet"+(p.stake?" · "+p.stake:""):(p.anon?"🔒 Secret poll":"🌐 Public poll");
+    card.appendChild(el("h2",p.q));
+    card.appendChild(el("div",tag+" · by "+p.by+(p.closed?" · closed":""),"mu"));
+    const pub=S.votes.filter(v=>v.poll===p.id),an=S.anon.filter(v=>v.poll===p.id);
+    const src=p.anon?an:pub,total=src.length;
+    const mine=pub.find(v=>v.name===who);
+    const voted=S.voted.some(v=>v.id===p.id+"_"+UID);
+    (p.options||[]).forEach((o,i)=>{
+      const n=src.filter(v=>v.opt===i).length,pct=total?Math.round(n*100/total):0;
+      const b=el("button",null,"opt"+(mine&&mine.opt===i?" me":"")+(p.closed&&p.winner===i?" win":""));
+      b.style.setProperty("--p",pct+"%");
+      b.appendChild(el("span",o));b.appendChild(el("span",n+" ("+pct+"%)"));
+      b.disabled=!!p.closed||(p.anon&&voted);
+      b.onclick=()=>vote(p,i);card.appendChild(b);
+      if(!p.anon&&n)card.appendChild(el("div","↳ "+pub.filter(v=>v.opt===i).map(v=>v.name).join(", "),"mu"));
+    });
+    if(p.anon){const c=S.voted.filter(v=>v.poll===p.id).length;card.appendChild(el("div",(voted?"You voted ✓ · ":"")+c+" voted. Choices are secret.","mu"))}
+    if(p.bet&&p.closed&&p.winner!=null){
+      const w=pub.filter(v=>v.opt===p.winner).map(v=>v.name);
+      card.appendChild(el("div","🏆 Winners: "+(w.join(", ")||"nobody")+(p.stake?" · "+p.stake:""),"pos"));
+    }
+    if(p.uid===UID||ADMIN||(!p.uid&&p.by===who)){
+      if(!p.closed){
+        let sel=null;
+        if(p.bet){sel=document.createElement("select");p.options.forEach((o,i)=>{const op=el("option","Winner: "+o);op.value=i;sel.appendChild(op)});card.appendChild(sel)}
+        const cb=el("button",p.bet?"Close bet":"Close poll","btn sm");
+        cb.onclick=()=>db.collection("polls").doc(p.id).update({closed:true,winner:sel?parseInt(sel.value,10):null});
+        card.appendChild(cb);
+      }
+      const ed=el("button","Edit","btn sm");
+      ed.onclick=()=>{const q=prompt("Question",p.q);if(!q)return;const o=(prompt("Options separated by |  (you can rename or add, not remove)",p.options.join(" | "))||"").split("|").map(x=>x.trim()).filter(Boolean);if(o.length<p.options.length){alert("You can't remove options.");return}const u={q:q.trim(),options:o.slice(0,8)};if(p.bet){const st=prompt("Stake",p.stake||"");if(st!==null)u.stake=st.trim()}db.collection("polls").doc(p.id).update(u).catch(e=>alert(e.message))};
+      card.appendChild(ed);
+      const d=el("button","Delete","btn sm g");
+      d.onclick=()=>{if(confirm("Delete this?"))db.collection("polls").doc(p.id).delete()};
+      card.appendChild(d);
+    }
+    box.appendChild(card);
+  });
+}
+const _d=new Date();
+let rentMonth=_d.getFullYear()+"-"+String(_d.getMonth()+1).padStart(2,"0"),rentKey="";
+function renderRent(){
+  const m=rentMonth,amts=S.rent.amounts||{};
+  $("rmon").textContent=new Date(m+"-01T12:00:00").toLocaleDateString(undefined,{month:"long",year:"numeric"});
+  const box=$("rlist");box.textContent="";let tot=0,paid=0;
+  S.members.forEach(n=>{
+    const a=Number(amts[n])||0;tot+=a;
+    const isPaid=S.rentpaid.some(r=>r.id===m+"_"+nk(n));if(isPaid)paid+=a;
+    const r=el("div",null,"row"),l=el("div");
+    l.appendChild(el("div",n));l.appendChild(el("div",fmt(a),"mu"));
+    const b=el("button",isPaid?"✓ Paid":"Not paid","btn sm"+(isPaid?"":" g"));
+    b.onclick=()=>{const ref=db.doc("rentpaid/"+m+"_"+nk(n));(isPaid?ref.delete():ref.set({month:m,name:n,ts:Date.now()})).catch(e=>alert(e.message))};
+    r.appendChild(l);r.appendChild(b);box.appendChild(r);
+  });
+  $("rsum").textContent=S.members.length?"Collected "+fmt(paid)+" of "+fmt(tot):"Add people first.";
+  const key=JSON.stringify([S.members,amts]);
+  if(key!==rentKey){
+    rentKey=key;const ra=$("ramts");ra.textContent="";
+    S.members.forEach(n=>{const r=el("div",null,"row");r.appendChild(el("span",n));const i=document.createElement("input");i.type="number";i.inputMode="decimal";i.dataset.n=n;i.value=amts[n]!=null?amts[n]:"";i.style.width="110px";r.appendChild(i);ra.appendChild(r)});
+  }
+}
+function weekStart(off){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)+7*off);return d}
+const wkKey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const weekIdx=d=>Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000+3)/7);
+function renderClean(){
+  const who=$("cm").value;
+  $("cwk").textContent="Week of "+weekStart(0).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+  [["cthis",0],["cnext",1]].forEach(([id,off])=>{
+    const box=$(id);box.textContent="";const d=weekStart(off),wk=wkKey(d);
+    if(!S.tasks.length||!S.members.length){box.appendChild(el("div",S.members.length?"Add tasks below.":"Add people first.","mu"));return}
+    S.tasks.forEach((t,i)=>{
+      const p=S.members[(weekIdx(d)+i)%S.members.length],cid=wk+"_"+t.id,dn=S.cdone.some(c=>c.id===cid);
+      const r=el("div",null,"row"),l=el("div"),nm=el("div",t.name);if(dn)nm.style.textDecoration="line-through";
+      l.appendChild(nm);l.appendChild(el("div",p+(p===who?" (you)":""),"mu"));r.appendChild(l);
+      if(off===0){
+        const b=el("button",dn?"✓ Done":"Mark done","btn sm"+(dn?"":" g"));
+        b.onclick=()=>{const ref=db.doc("cdone/"+cid);(dn?ref.delete():ref.set({wk,task:t.id,by:p,ts:Date.now()})).catch(e=>alert(e.message))};
+        r.appendChild(b);
+      }
+      box.appendChild(r);
+    });
+  });
+  const tb=$("ctasks");tb.textContent="";
+  S.tasks.forEach(t=>{const r=el("div",null,"row");r.appendChild(el("span",t.name));const x=el("button","✕","x");x.onclick=()=>{if(confirm("Delete this task?"))db.collection("tasks").doc(t.id).delete()};r.appendChild(x);tb.appendChild(r)});
+}
+const rd=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)});
+function readImg(f){return rd(f).then(u=>new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,800/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);ok(c.toDataURL("image/jpeg",.6))};im.onerror=no;im.src=u}))}
+const nameOf=(u,f)=>{const c=S.claims.find(c=>c.uid===u);return c?c.name:(f||"?")};
+function refreshMe(){
+  const m=S.claims.find(c=>c.uid===UID)||null;
+  if((m&&m.name)!==(MY&&MY.name))lastMembers="";
+  MY=m;ADMIN=S.admins.some(a=>a.id===UID);
+}
+function applyRole(){
+  $("pn").style.display=$("pnadd").style.display=ADMIN?"":"none";
+  $("rsave").parentElement.style.display=ADMIN?"":"none";
+  $("cti").style.display=$("ctadd").style.display=ADMIN?"":"none";
+  $("me").parentElement.style.display="none";
+  const c=$("cm");if(MY&&(c.options.length!==1||c.value!==MY.name)){c.textContent="";const o=el("option",MY.name);o.value=MY.name;c.appendChild(o)}
+  c.disabled=true;
+}
+async function claim(name){
+  name=name.trim();if(!name)return;
+  const b=db.batch(),first=!S.admins.length;
+  b.set(db.doc("claims/"+nk(name)),{uid:UID,name,ts:Date.now()});
+  if(first){b.set(db.doc("admins/"+UID),{ts:Date.now()});b.set(db.doc("meta/admin"),{uid:UID});if(!S.members.includes(name))b.set(db.doc("flat/members"),{names:[...S.members,name]})}
+  try{await b.commit()}catch(e){alert("Could not choose this name (maybe someone just took it): "+e.message)}
+}
+function gate(){
+  const g=$("gate"),need=!UID||(!MY&&loaded.claims&&loaded.admins&&loaded.members);
+  document.body.classList.toggle("gated",!!need);g.style.display=need?"block":"none";
+  if(!need)return;
+  $("msg").style.display="none";
+  const k=(UID||"")+"|"+S.members.join()+"|"+S.claims.length+"|"+S.admins.length;
+  if(gate.k===k)return;gate.k=k;g.textContent="";
+  const inp=(t,p)=>{const i=document.createElement("input");i.type=t;i.placeholder=p;return i};
+  if(!UID){
+    const a=firebase.auth(),em=inp("email","Email"),pw=inp("password","Password (min 6 characters)");
+    g.appendChild(el("h2","Log in to your flat"));g.appendChild(em);g.appendChild(pw);
+    const b1=el("button","Log in","btn");b1.onclick=()=>a.signInWithEmailAndPassword(em.value.trim(),pw.value).catch(e=>alert(e.message));
+    const b2=el("button","Create account","btn");b2.onclick=()=>a.createUserWithEmailAndPassword(em.value.trim(),pw.value).catch(e=>alert(e.message));
+    const b3=el("button","Forgot password","btn sm g");b3.onclick=()=>{if(em.value)a.sendPasswordResetEmail(em.value.trim()).then(()=>alert("Reset email sent")).catch(e=>alert(e.message))};
+    [b1,b2,b3].forEach(x=>g.appendChild(x));return;
+  }
+  const first=!S.admins.length;
+  g.appendChild(el("h2",first?"Welcome! You are first, so you will be the admin.":"Which flatmate are you?"));
+  if(first){const ni=inp("text","Your name");g.appendChild(ni);const b=el("button","Continue","btn");b.onclick=()=>claim(ni.value);g.appendChild(b)}
+  else{
+    const free=S.members.filter(n=>!S.claims.some(c=>c.name===n));
+    if(!free.length)g.appendChild(el("div","No free names. Ask the admin to add your name.","mu"));
+    free.forEach(n=>{const b=el("button",n,"btn");b.onclick=()=>{if(confirm("You are "+n+"? You can't change this later."))claim(n)};g.appendChild(b)});
+    g.appendChild(el("div","Name not here? Ask the admin to add it in People.","mu"));
+  }
+  const lo=el("button","Log out","btn sm g");lo.onclick=()=>firebase.auth().signOut().then(()=>location.reload());g.appendChild(lo);
+}
+let chatSig="";
+function renderChat(){
+  const sig=UID+"|"+S.claims.length+"|"+S.chat.map(m=>m.id+(m.edited?"e"+(m.text||"").length:"")).join(",");
+  if(sig===chatSig)return;chatSig=sig;
+  const cl=$("cl");cl.textContent="";
+  if(!S.chat.length)cl.appendChild(el("div","No messages yet. Say hi 👋","mu"));
+  S.chat.slice(-100).forEach(m=>{
+    const me=m.uid?m.uid===UID:m.by===getMe(),w=el("div",null,"bub"+(me?" mine":""));
+    w.appendChild(el("div",nameOf(m.uid,m.by)+" · "+new Date(m.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+(m.edited?" · edited":""),"mu"));
+    if(m.img){const i=document.createElement("img");i.src=m.img;i.style.cssText="max-width:100%;border-radius:8px";w.appendChild(i)}
+    if(m.vid){const v=document.createElement("video");v.src=m.vid;v.controls=true;v.style.maxWidth="100%";w.appendChild(v)}
+    if(m.audio){const a=document.createElement("audio");a.src=m.audio;a.controls=true;a.style.maxWidth="100%";w.appendChild(a)}
+    if(m.text)w.appendChild(el("div",m.text));
+    if(me||ADMIN){
+      const bar=el("div");
+      if(me&&m.text){const e=el("button","✎","x");e.onclick=()=>{const t=prompt("Edit message",m.text);if(t&&t.trim())db.collection("chat").doc(m.id).update({text:t.trim(),edited:true})};bar.appendChild(e)}
+      const d=el("button","🗑","x");d.onclick=()=>{if(confirm("Delete message?"))db.collection("chat").doc(m.id).delete()};bar.appendChild(d);w.appendChild(bar);
+    }
+    cl.appendChild(w);
+  });
+  cl.scrollTop=cl.scrollHeight;
+}
+let lastTyp=0;
+function typing(on){
+  if(!UID||!MY)return;const r=db.doc("typing/"+UID);
+  if(on){if(Date.now()-lastTyp<2500)return;lastTyp=Date.now();r.set({name:MY.name,ts:Date.now()}).catch(()=>{})}
+  else{lastTyp=0;r.delete().catch(()=>{})}
+}
+function renderTyping(){const n=S.typing.filter(t=>t.id!==UID&&Date.now()-t.ts<5000).map(t=>t.name);$("ctyp").textContent=n.length?n.join(", ")+(n.length>1?" are":" is")+" typing…":""}
+setInterval(renderTyping,1500);
+function renderStatus(){
+  const b=$("stl");b.textContent="";const now=Date.now(),live=S.status.filter(x=>now-x.ts<864e5);
+  if(!live.length)b.appendChild(el("div","No active status.","mu"));
+  live.forEach(x=>{
+    const c=el("div",null,"card");c.appendChild(el("div",nameOf(x.uid)+" · "+Math.max(1,Math.round((864e5-(now-x.ts))/36e5))+"h left","mu"));
+    if(x.img){const i=document.createElement("img");i.src=x.img;i.style.cssText="max-width:100%;border-radius:8px";c.appendChild(i)}
+    if(x.text)c.appendChild(el("div",x.text));
+    if(x.uid===UID||ADMIN){const d=el("button","Delete","btn sm g");d.onclick=()=>db.collection("status").doc(x.id).delete();c.appendChild(d)}
+    b.appendChild(c);
+  });
+  S.status.filter(x=>now-x.ts>=864e5).forEach(x=>db.collection("status").doc(x.id).delete().catch(()=>{}));
+}
+const seenN={},primedAt=Date.now()+4000;
+function notify(t,b){if(!("Notification" in window)||Notification.permission!=="granted"||!document.hidden)return;navigator.serviceWorker.ready.then(r=>r.showNotification(t,{body:b,icon:"icon-192.png"})).catch(()=>{})}
+function checkNotify(){
+  [["chat",1,m=>[nameOf(m.uid,m.by),m.text||(m.img?"📷 Photo":m.audio?"🎤 Voice note":"New message")]],
+   ["polls",0,p=>["New "+(p.bet?"bet":"poll"),p.q]],
+   ["status",0,x=>[nameOf(x.uid)+" posted a status",x.text||"📷"]],
+   ["exp",0,e=>["New expense",e.desc+" · "+fmt(e.amount)]]
+  ].forEach(([k,asc,f])=>{
+    if(!loaded[k])return;const a=S[k],prev=seenN[k];seenN[k]=a.length;
+    if(prev==null||a.length<=prev||Date.now()<primedAt)return;
+    const m=asc?a[a.length-1]:a[0];if(m.uid&&m.uid===UID)return;const [t,b]=f(m);notify(t,b);
+  });
+}
+let pickFor="chat",rec=null,chunks=[],rtimer;
+function saveMembers(list){return db.doc("flat/members").set({names:list}).catch(e=>alert("Could not save: "+e.message))}
+
+function wire(){
+  $("pnadd").onclick=()=>{const n=$("pn").value.trim();if(!n||S.members.includes(n))return;$("pn").value="";saveMembers([...S.members,n])};
+  const syncMe=v=>{setMe(v);$("me").value=v;$("cm").value=v;$("ep").value=v;$("pf").value=v;render()};
+  $("me").onchange=()=>syncMe($("me").value);
+  $("cm").onchange=()=>syncMe($("cm").value);
+  const send=()=>{const text=$("ci").value.trim(),by=$("cm").value;if(!text||!by){if(!by)alert("Add people first, then choose who you are.");return}$("ci").value="";(typing(false),db.collection("chat").add({by,uid:UID,text,ts:Date.now()})).catch(e=>alert("Could not send: "+e.message))};
+  $("csend").onclick=send;
+  const shiftM=k=>{const [y,m]=rentMonth.split("-").map(Number),d=new Date(y,m-1+k,1);rentMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");renderRent()};
+  $("ci").oninput=()=>typing(true);$("ci").onblur=()=>typing(false);
+  $("cat").onclick=()=>{pickFor="chat";$("ifile").accept="image/*,video/*";$("ifile").click()};
+  $("sph").onclick=()=>{pickFor="status";$("ifile").accept="image/*";$("ifile").click()};
+  $("ifile").onchange=async()=>{
+    const f=$("ifile").files[0];$("ifile").value="";if(!f)return;
+    try{
+      const vid=f.type.startsWith("video");let d;
+      if(vid){if(f.size>600000){alert("On the free plan videos must be under 0.6 MB (a few seconds). Photos and voice notes have no problem.");return}d=await rd(f)}else d=await readImg(f);
+      const key=vid?"vid":"img";
+      if(pickFor==="status"){await db.collection("status").add({uid:UID,text:$("sti").value.trim(),[key]:d,ts:Date.now()});$("sti").value=""}
+      else await db.collection("chat").add({uid:UID,by:MY.name,[key]:d,ts:Date.now()});
+    }catch(e){alert("Could not send: "+e.message)}
+  };
+  $("spost").onclick=()=>{const text=$("sti").value.trim();if(!text)return;$("sti").value="";db.collection("status").add({uid:UID,text,ts:Date.now()}).catch(e=>alert(e.message))};
+  $("cmic").onclick=async()=>{
+    if(rec){rec.stop();return}
+    try{
+      const st=await navigator.mediaDevices.getUserMedia({audio:true});
+      rec=new MediaRecorder(st,{audioBitsPerSecond:24000});chunks=[];
+      rec.ondataavailable=e=>chunks.push(e.data);
+      rec.onstop=async()=>{clearTimeout(rtimer);st.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:rec.mimeType});rec=null;$("cmic").textContent="🎤";
+        if(blob.size>600000){alert("Voice note too long.");return}
+        db.collection("chat").add({uid:UID,by:MY.name,audio:await rd(blob),ts:Date.now()}).catch(e=>alert(e.message))};
+      rec.start();$("cmic").textContent="⏹";rtimer=setTimeout(()=>rec&&rec.stop(),90000);
+    }catch(e){alert("Microphone not allowed: "+e.message)}
+  };
+  $("nbtn").onclick=()=>{if(!("Notification" in window)){alert("Notifications are not supported here.");return}Notification.requestPermission().then(p=>alert(p==="granted"?"Notifications are on":"Notifications are blocked in your phone settings"))};
+  $("lout").onclick=()=>firebase.auth().signOut().then(()=>location.reload());
+  $("rprev").onclick=()=>shiftM(-1);$("rnext").onclick=()=>shiftM(1);
+  $("req").onclick=()=>{const t=parseFloat($("rtot").value);if(!(t>0)||!S.members.length)return;const each=Math.round(t/S.members.length*100)/100;document.querySelectorAll("#ramts input").forEach(i=>i.value=each)};
+  $("rsave").onclick=()=>{const amounts={};document.querySelectorAll("#ramts input").forEach(i=>{amounts[i.dataset.n]=parseFloat(i.value)||0});db.doc("flat/rent").set({amounts}).catch(e=>alert("Could not save: "+e.message))};
+  $("ctadd").onclick=()=>{const name=$("cti").value.trim();if(!name)return;$("cti").value="";db.collection("tasks").add({name,ts:Date.now()}).catch(e=>alert("Could not save: "+e.message))};
+  $("qt").onchange=()=>{const bet=$("qt").value==="bet";$("qs").style.display=bet?"block":"none";$("qal").style.display=bet?"none":"flex"};
+  $("qgo").onclick=()=>{
+    const q=$("qq").value.trim(),opts=$("qo").value.split("\n").map(s=>s.trim()).filter(Boolean),bet=$("qt").value==="bet",by=$("cm").value;
+    if(!q||opts.length<2||!by){alert("Write a question, at least 2 options (one per line), and choose who you are first.");return}
+    db.collection("polls").add({uid:UID,q,options:opts.slice(0,8),bet,anon:!bet&&$("qa").checked,stake:bet?$("qs").value.trim():"",by,closed:false,winner:null,ts:Date.now()})
+      .then(()=>{$("qq").value="";$("qo").value="";$("qs").value=""}).catch(e=>alert("Could not save: "+e.message));
+  };
+  $("ci").onkeydown=e=>{if(e.key==="Enter")send()};
+  $("eadd").onclick=()=>{
+    const desc=$("ed").value.trim(),amount=parseFloat($("ea").value);
+    const split=[...document.querySelectorAll("#es input:checked")].map(c=>c.value);
+    if(!desc||!(amount>0)||!split.length||!$("ep").value){alert("Fill in what, amount, payer and who shares it.");return}
+    db.collection("expenses").add({uid:UID,desc,amount,by:$("ep").value,split,ts:Date.now()}).then(()=>{$("ed").value="";$("ea").value=""}).catch(e=>alert("Could not save: "+e.message));
+  };
+  $("padd").onclick=()=>{
+    const amount=parseFloat($("pa").value),from=$("pf").value,to=$("pt").value;
+    if(!(amount>0)||!from||!to||from===to){alert("Choose two different people and an amount.");return}
+    db.collection("payments").add({from,to,amount,ts:Date.now()}).then(()=>{$("pa").value=""}).catch(e=>alert("Could not save: "+e.message));
+  };
+  $("sadd").onclick=()=>{const name=$("si").value.trim();if(!name)return;$("si").value="";db.collection("shopping").add({name,done:false,ts:Date.now()}).catch(e=>alert("Could not save: "+e.message))};
+}
+
+const firebaseConfig={apiKey:"AIzaSyCefqelpJGDSOP0vwucjGCCP3Qd9dHImW4",authDomain:"diramats.firebaseapp.com",projectId:"diramats",storageBucket:"diramats.firebasestorage.app",messagingSenderId:"227710727018",appId:"1:227710727018:web:f9ef2c6379f3fab2ae2b13"};
+async function init(){
+  if(firebaseConfig.apiKey.startsWith("PASTE")){$("msg").textContent="Add your Firebase settings at the bottom of index.html first (see README).";return}
+  let code="";try{code=localStorage.getItem("flatcode")||""}catch(e){}
+  if(!code){
+    code=(prompt("Flat code (at least 8 letters or numbers, the same for all flatmates):")||"").replace(/[^A-Za-z0-9]/g,"");
+    if(code.length<8){$("msg").textContent="Reload and enter a flat code with at least 8 letters or numbers.";return}
+    try{localStorage.setItem("flatcode",code)}catch(e){}
+  }
+  firebase.initializeApp(firebaseConfig);
+  const fs=firebase.firestore(),base="flats/"+code+"/";
+  db={doc:p=>fs.doc(base+p),collection:p=>fs.collection(base+p),batch:()=>fs.batch()};
+  wire();
+  firebase.auth().onAuthStateChanged(u=>{
+    if(!u){UID=null;gate();return}
+    UID=u.uid;if(subs){render();return}subs=true;start();
+  });
+}
+function start(){
+  const timer=setTimeout(()=>{$("msg").textContent="Taking a long time to load…"},10000);
+  const done=()=>{clearTimeout(timer);$("msg").style.display="none"};
+  const err=e=>{$("msg").style.display="block";$("msg").textContent="Data error: "+e.message};
+  const list=(name,key,sortDesc)=>db.collection(name).onSnapshot(q=>{
+    S[key]=q.docs.map(d=>Object.assign({id:d.id},d.data()));
+    S[key].sort((a,b)=>sortDesc?(b.ts||0)-(a.ts||0):(a.ts||0)-(b.ts||0));
+    loaded[key]=1;done();render();
+  },err);
+  db.doc("flat/members").onSnapshot(x=>{S.members=(x.exists&&x.data().names)||[];loaded.members=1;done();render()},err);
+  db.doc("flat/rent").onSnapshot(x=>{S.rent=(x.exists&&x.data())||{};render()},err);
+  db.collection("typing").onSnapshot(q=>{S.typing=q.docs.map(d=>Object.assign({id:d.id},d.data()));renderTyping()},()=>{});
+  list("claims","claims",false);list("admins","admins",false);
+  list("chat","chat",false);list("polls","polls",true);list("votes","votes",true);list("anonvotes","anon",true);list("voted","voted",true);
+  list("rentpaid","rentpaid",true);list("tasks","tasks",false);list("cdone","cdone",true);list("status","status",true);
+  list("expenses","exp",true);list("payments","pay",true);list("shopping","shop",false);
+}
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+init();
+</script>
+</body>
+</html>
