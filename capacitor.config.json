@@ -1,1 +1,10 @@
-{"appId":"com.dira.flat","appName":"Flat","webDir":"www"}
+{
+  "appId": "com.y3231131hue.dira",
+  "appName": "Dira",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://y3231131-hue.github.io/Dira/",
+    "cleartext": false
+  }
+}
