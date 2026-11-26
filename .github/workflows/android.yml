@@ -41,7 +41,7 @@ jobs:
           curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js -o www/firebase-auth-compat.js
           curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js -o www/firebase-firestore-compat.js
 
-            - name: Create Android project
+      - name: Create Android project
         run: npx cap add android
 
       - name: Sync app
