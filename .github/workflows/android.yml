@@ -32,7 +32,7 @@ jobs:
       - name: Install Capacitor CLI
         run: npm install @capacitor/cli@7.4.3
 
-            - name: Prepare web app
+      - name: Prepare web app
         run: |
           rm -rf www
           mkdir -p www
@@ -40,28 +40,9 @@ jobs:
           curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js -o www/firebase-app-compat.js
           curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js -o www/firebase-auth-compat.js
           curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js -o www/firebase-firestore-compat.js
+
       - name: Create Android project
         run: npx cap add android
-
-      - name: Add Android permissions
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path("android/app/src/main/AndroidManifest.xml")
-          manifest = path.read_text()
-          permissions = [
-              '    <uses-permission android:name="android.permission.INTERNET" />\n',
-              '    <uses-permission android:name="android.permission.RECORD_AUDIO" />\n',
-              '    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n',
-          ]
-
-          for permission in permissions:
-              if permission.strip() not in manifest:
-                  manifest = manifest.replace("<application", permission + "<application", 1)
-
-          path.write_text(manifest)
-          PY
 
       - name: Sync app
         run: npx cap sync android
