@@ -2,4 +2,5 @@
   "appId": "com.y3231131hue.dira",
   "appName": "Dira",
   "webDir": "www",
-  "bundledWebRuntime": false,
+  "bundledWebRuntime": false
+}
