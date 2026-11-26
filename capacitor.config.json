@@ -1,0 +1,10 @@
+{
+  "appId": "com.dira.flat",
+  "appName": "Flat",
+  "webDir": "www",
+  "server": {
+    "url": "https://y3231131-hue.github.io/Dira/",
+    "cleartext": false,
+    "allowNavigation": ["y3231131-hue.github.io", "*.firebaseapp.com", "*.googleapis.com"]
+  }
+}
