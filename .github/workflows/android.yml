@@ -7,6 +7,9 @@ on:
       - main
       - master
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,16 +34,21 @@ jobs:
           npm install
           npm install firebase@10.12.2 @capacitor/cli@7.4.3
 
+      - name: Save Firebase files to repo for website
+        run: |
+          cp node_modules/firebase/firebase-app-compat.js .
+          cp node_modules/firebase/firebase-auth-compat.js .
+          cp node_modules/firebase/firebase-firestore-compat.js .
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@://github.com"
+          git add firebase-app-compat.js firebase-auth-compat.js firebase-firestore-compat.js
+          git diff --staged --quiet || (git commit -m "Add local Firebase SDK files for website" && git push)
+
       - name: Prepare web app
         run: |
           rm -rf www
           mkdir -p www
-          cp index.html manifest.webmanifest icon-192.png icon-512.png www/
-          cp node_modules/firebase/firebase-app-compat.js www/
-          cp node_modules/firebase/firebase-auth-compat.js www/
-          cp node_modules/firebase/firebase-firestore-compat.js www/
-          sed -i 's|https://gstatic.com[^/]*/||g' www/index.html
-          grep -q "firebase-app-compat.js" www/index.html || sed -i '0,/<script>/s|<script>|<script src="firebase-app-compat.js"></script>\n<script src="firebase-auth-compat.js"></script>\n<script src="firebase-firestore-compat.js"></script>\n<script>|' www/index.html
+          cp index.html manifest.webmanifest icon-192.png icon-512.png firebase-app-compat.js firebase-auth-compat.js firebase-firestore-compat.js www/
 
       - name: Create Android project
         run: npx cap add android
