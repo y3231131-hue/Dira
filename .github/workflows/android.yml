@@ -32,12 +32,14 @@ jobs:
       - name: Install Capacitor CLI
         run: npm install @capacitor/cli@7.4.3
 
-      - name: Prepare web app
+            - name: Prepare web app
         run: |
           rm -rf www
           mkdir -p www
           cp index.html manifest.webmanifest sw.js icon-192.png icon-512.png www/
-
+          curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js -o www/firebase-app-compat.js
+          curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js -o www/firebase-auth-compat.js
+          curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js -o www/firebase-firestore-compat.js
       - name: Create Android project
         run: npx cap add android
 
