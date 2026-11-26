@@ -39,7 +39,7 @@ jobs:
           cp node_modules/firebase/firebase-app-compat.js www/
           cp node_modules/firebase/firebase-auth-compat.js www/
           cp node_modules/firebase/firebase-firestore-compat.js www/
-          sed -i 's|https://www.gstatic.com/firebasejs/[^/]*/||g' www/index.html
+          sed -i 's|https://gstatic.com[^/]*/||g' www/index.html
           grep -q "firebase-app-compat.js" www/index.html || sed -i '0,/<script>/s|<script>|<script src="firebase-app-compat.js"></script>\n<script src="firebase-auth-compat.js"></script>\n<script src="firebase-firestore-compat.js"></script>\n<script>|' www/index.html
 
       - name: Create Android project
