@@ -145,15 +145,9 @@ input,select{width:100%;padding:10px;margin:4px 0;border-radius:10px;border:1px 
 <div class="card"><button class="btn" id="nbtn">🔔 Enable notifications</button><button class="btn" id="lout" style="background:var(--bg);color:var(--neg);border:1px solid var(--bd)">Log out</button><div class="mu" style="margin-top:6px">Notifications arrive while the app is open or in the background.</div></div>
 <div class="card mu">Everyone in the flat uses the same flat code (asked on first launch). Keep it private.</div>
 </section>
-
-<<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
-  onerror="document.getElementById('msg').textContent='Could not load Firebase. Check internet access.'"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
-  onerror="document.getElementById('msg').textContent='Could not load Firebase Auth. Check internet access.'"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"
-  onerror="document.getElementById('msg').textContent='Could not load Firebase database. Check internet access.'"></script>
+<script src="firebase-app-compat.js"></script>
+<script src="firebase-auth-compat.js"></script>
+<script src="firebase-firestore-compat.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 let UID=null,MY=null,ADMIN=false,subs=false,loaded={};
