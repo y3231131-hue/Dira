@@ -31,6 +31,17 @@ jobs:
           npm install
           npm install firebase@10.12.2 @capacitor/cli@7.4.3
 
+      - name: Fix website index.html if Firebase scripts are missing
+        run: |
+          if ! grep -q "firebase-app-compat.js" index.html; then
+            sed -i '0,/<script>/s|<script>|<script src="https://gstatic.com"></script>\n<script src="https://gstatic.com"></script>\n<script src="https://gstatic.com"></script>\n<script>|' index.html
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@://github.com"
+            git add index.html
+            git commit -m "Restore Firebase web scripts in index.html"
+            git push
+          fi
+
       - name: Prepare web app
         run: |
           rm -rf www
@@ -40,7 +51,6 @@ jobs:
           cp node_modules/firebase/firebase-auth-compat.js www/
           cp node_modules/firebase/firebase-firestore-compat.js www/
           sed -i 's|https://gstatic.com[^/]*/||g' www/index.html
-          grep -q "firebase-app-compat.js" www/index.html || sed -i '0,/<script>/s|<script>|<script src="firebase-app-compat.js"></script>\n<script src="firebase-auth-compat.js"></script>\n<script src="firebase-firestore-compat.js"></script>\n<script>|' www/index.html
 
       - name: Create Android project
         run: npx cap add android
