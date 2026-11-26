@@ -3,7 +3,6 @@
   "appName": "Dira",
   "webDir": "www",
   "bundledWebRuntime": false,
-  "server": {
     "url": "https://y3231131-hue.github.io/Dira/",
     "cleartext": false
   }
