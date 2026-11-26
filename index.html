@@ -564,7 +564,13 @@ function start(){
   list("expenses","exp",true);list("payments","pay",true);list("shopping","shop",false);
 }
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-init();
-</script>
-</body>
-</html>
+
+window.addEventListener("error", e => {
+  $("msg").style.display = "block";
+  $("msg").textContent = "Startup error: " + (e.message || e.error?.message || "Unknown error");
+});
+
+Promise.resolve(init()).catch(e => {
+  $("msg").style.display = "block";
+  $("msg").textContent = "Startup error: " + (e.message || e);
+});
