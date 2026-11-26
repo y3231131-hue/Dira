@@ -1031,7 +1031,11 @@ ppl:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.4-5.5 6.5-5.5s5.8 
 document.querySelectorAll("nav button").forEach(b=>{const p=NAVIC[b.dataset.t];if(p)b.querySelector("span").innerHTML=SVGW(p)});
 $("hmb").innerHTML=SVGW('<path d="M4 7h16M4 12h16M4 17h10"/>');
 buildDrawer();
-init();
+Promise.resolve(init()).catch(e => {
+  $("msg").style.display = "block";
+  $("msg").textContent = "Startup error: " + (e.message || e);
+  console.error("Startup error:", e);
+});
 </script>
 </body>
 </html>
