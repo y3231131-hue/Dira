@@ -1,4 +1,11 @@
 <!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<body style="font-family:sans-serif;padding:24px">Loading Flat…
-<script>location.replace("https://y3231131-hue.github.io/Dira/")</script>
+<body style="font-family:sans-serif;padding:24px;background:#fff;color:#000">
+<h2>Flat app started ✓</h2>
+<p id="e"></p>
+<p><a href="https://y3231131-hue.github.io/Dira/" style="font-size:22px">Open Flat</a></p>
+<p style="font-size:12px;word-break:break-all" id="u"></p>
+<script>
+document.getElementById("u").textContent=navigator.userAgent;
+window.onerror=function(m){document.getElementById("e").textContent+=m+" | "};
+</script>
