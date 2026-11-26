@@ -1,7 +1,7 @@
 {
   "appId": "com.y3231131hue.dira",
   "appName": "Dira",
-  "webDir": ".",
+  "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
     "url": "https://y3231131-hue.github.io/Dira/",
