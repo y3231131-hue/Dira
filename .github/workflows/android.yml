@@ -37,9 +37,11 @@ jobs:
           rm -rf www
           mkdir -p www
           cp index.html manifest.webmanifest icon-192.png icon-512.png www/
-          curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js -o www/firebase-app-compat.js
-          curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js -o www/firebase-auth-compat.js
-          curl -fL https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js -o www/firebase-firestore-compat.js
+          curl -fL https://gstatic.com -o www/firebase-app-compat.js
+          curl -fL https://gstatic.com -o www/firebase-auth-compat.js
+          curl -fL https://gstatic.com -o www/firebase-firestore-compat.js
+          sed -i 's|https://gstatic.com||g' www/index.html
+          grep -q "firebase-app-compat.js" www/index.html || sed -i '0,/<script>/s|<script>|<script src="firebase-app-compat.js"></script>\n<script src="firebase-auth-compat.js"></script>\n<script src="firebase-firestore-compat.js"></script>\n<script>|' www/index.html
 
       - name: Create Android project
         run: npx cap add android
