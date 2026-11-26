@@ -27,20 +27,19 @@ jobs:
           java-version: 21
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Install Capacitor CLI
-        run: npm install @capacitor/cli@7.4.3
+        run: |
+          npm install
+          npm install firebase@10.12.2 @capacitor/cli@7.4.3
 
       - name: Prepare web app
         run: |
           rm -rf www
           mkdir -p www
           cp index.html manifest.webmanifest icon-192.png icon-512.png www/
-          curl -fL https://gstatic.com -o www/firebase-app-compat.js
-          curl -fL https://gstatic.com -o www/firebase-auth-compat.js
-          curl -fL https://gstatic.com -o www/firebase-firestore-compat.js
-          sed -i 's|https://gstatic.com||g' www/index.html
+          cp node_modules/firebase/firebase-app-compat.js www/
+          cp node_modules/firebase/firebase-auth-compat.js www/
+          cp node_modules/firebase/firebase-firestore-compat.js www/
+          sed -i 's|https://www.gstatic.com/firebasejs/[^/]*/||g' www/index.html
           grep -q "firebase-app-compat.js" www/index.html || sed -i '0,/<script>/s|<script>|<script src="firebase-app-compat.js"></script>\n<script src="firebase-auth-compat.js"></script>\n<script src="firebase-firestore-compat.js"></script>\n<script>|' www/index.html
 
       - name: Create Android project
