@@ -32,7 +32,12 @@ jobs:
 
       - name: Install Capacitor CLI
         run: npm install @capacitor/cli@7.4.3
-
+        
+      - name: Prepare web app
+        run: |
+          mkdir -p www
+          cp index.html manifest.webmanifest sw.js icon-192.png icon-512.png www/
+      
       - name: Create Android project
         run: npx cap add android
 
