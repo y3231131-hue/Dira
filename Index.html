@@ -486,6 +486,15 @@ body.inchat{padding-top:0;background-image:none}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
+const DIAG={};
+function showDiag(){
+  const m=document.getElementById("msg");if(!m)return;
+  if(m.style.display==="none"){clearInterval(DIAG.iv);return}
+  m.style.display="block";m.style.whiteSpace="pre-wrap";m.style.cursor="pointer";m.onclick=()=>location.reload();
+  m.textContent=["Still connecting… tap here to retry","","version: "+(typeof VERSION!=="undefined"?VERSION:"?"),"online: "+navigator.onLine,"Firebase loaded: "+(typeof firebase!=="undefined"),"started: "+(DIAG.init||"no"),"login: "+(DIAG.auth||"waiting"),"data started: "+(DIAG.start||"no"),"test read: "+(DIAG.test||"not run"),"first data: "+(DIAG.first||"not yet")].join("\n");
+}
+window.addEventListener("error",e=>{if(/ResizeObserver/.test(e.message||""))return;const m=document.getElementById("msg");if(m){m.style.display="block";m.textContent="Error: "+(e.message||"unknown")+(e.lineno?" (line "+e.lineno+")":"")}});
+window.addEventListener("unhandledrejection",e=>{const m=document.getElementById("msg");if(m){m.style.display="block";m.textContent="Error: "+((e.reason&&e.reason.message)||e.reason)}});
 const $=id=>document.getElementById(id);
 let UID=null,MY=null,ADMIN=false,subs=false,loaded={};
 const S={members:[],exp:[],pay:[],shop:[],chat:[],polls:[],votes:[],anon:[],voted:[],rent:{},rentpaid:[],tasks:[],cdone:[],claims:[],admins:[],status:[],typing:[],profiles:[],sviews:[],dms:[],removed:[],calllog:[],reads:[],groups:[],jobs:[]};
@@ -715,7 +724,7 @@ function gate(){
   const gone=!!(UID&&S.removed.some(r=>r.id===UID)),g=$("gate"),need=!UID||gone||(!MY&&loaded.claims&&loaded.admins&&loaded.members);
   document.body.classList.toggle("gated",!!need);g.style.display=need?"block":"none";
   if(!need)return;
-  $("msg").style.display="none";
+  $("msg").style.display="none";DIAG.gate=1;
   const k=(UID||"")+(gone?"X":"")+"|"+S.members.join()+"|"+S.claims.length+"|"+S.admins.length;
   if(gate.k===k)return;gate.k=k;g.textContent="";
   const inp=(t,p)=>{const i=document.createElement("input");i.type=t;i.placeholder=p;return i};
@@ -1206,10 +1215,10 @@ function renderPts(){
   });
   b.appendChild(lg);
 }
-const VERSION="v12 · 27 Nov 2026";
+const VERSION="v14 · 27 Nov 2026";
 async function ensureFirebase(){
   if(typeof firebase!=="undefined")return true;
-  const load=u=>new Promise(r=>{const t=document.createElement("script");t.src=u;t.onload=()=>r(true);t.onerror=()=>r(false);document.head.appendChild(t)});
+  const load=u=>new Promise(r=>{const t=document.createElement("script");t.src=u;t.onload=()=>r(true);t.onerror=()=>r(false);setTimeout(()=>r(false),8000);document.head.appendChild(t)});
   for(const b of ["https://cdn.jsdelivr.net/npm/firebase@10.12.2/","https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/"]){
     const x=b.includes("cdnjs")?".min.js":".js";
     if((await load(b+"firebase-app-compat"+x))&&(await load(b+"firebase-auth-compat"+x))&&(await load(b+"firebase-firestore-compat"+x))&&typeof firebase!=="undefined")return true;
@@ -1331,18 +1340,21 @@ async function init(){
     if(code.length<8){$("msg").textContent="Reload and enter a flat code with at least 8 letters or numbers.";return}
     try{localStorage.setItem("flatcode",code)}catch(e){}
   }
-  firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);DIAG.init="ok";setTimeout(()=>{if(!DIAG.first&&!DIAG.gate){showDiag();DIAG.iv=setInterval(showDiag,2000)}},8000);
   const fs=firebase.firestore(),base="flats/"+code+"/";
+  try{fs.settings({experimentalAutoDetectLongPolling:true,useFetchStreams:false,merge:true})}catch(e){}
   db={doc:p=>fs.doc(base+p),collection:p=>fs.collection(base+p),batch:()=>fs.batch()};
   wire();
   firebase.auth().onAuthStateChanged(u=>{
+    DIAG.auth=u?"signed in":"signed out";
     if(!u){UID=null;gate();return}
     UID=u.uid;if(subs){render();return}subs=true;start();
   });
 }
 function start(){
-  const timer=setTimeout(()=>{$("msg").textContent="Taking a long time to load…"},10000);
-  const done=()=>{clearTimeout(timer);$("msg").style.display="none"};
+  DIAG.start="yes";db.doc("flat/members").get({source:"server"}).then(()=>{DIAG.test="ok"},e=>{DIAG.test="error "+(e.code||e.message)});
+  const timer=setTimeout(()=>{$("msg").textContent="Still connecting… tap here to retry";$("msg").style.cursor="pointer";$("msg").onclick=()=>location.reload()},10000);
+  const done=()=>{clearTimeout(timer);DIAG.first=DIAG.first||(Math.round(performance.now())+" ms");clearInterval(DIAG.iv);$("msg").style.display="none"};
   const err=e=>{$("msg").style.display="block";$("msg").textContent="Data error: "+e.message};
   const list=(name,key,sortDesc)=>db.collection(name).onSnapshot(q=>{
     S[key]=q.docs.map(d=>Object.assign({id:d.id},d.data()));
